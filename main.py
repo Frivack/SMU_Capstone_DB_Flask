@@ -18,6 +18,10 @@ allowed_tables = ['reviews', 'users']
 def index():
     return 'Server is running!', 200
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    return 'OK', 200
+
 # 테이블 데이터 조회
 @app.route('/get-data/<table_name>', methods=['GET'])
 def get_data_route(table_name):
