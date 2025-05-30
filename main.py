@@ -107,8 +107,8 @@ def add_review():
 def get_all_parts():
     tables = [
         "cooler", "cpu", "earphone", "fan", "gpu", "hard_drive", "headset", "keyboard",
-        "monitor", "motherboard", "mouse", "pc_case", "pcparts", "power_supply",
-        "ram", "sound_card", "speaker", "storage"
+        "monitor", "motherboard", "mouse", "pc_case", "power_supply",
+        "ram", "sound_card", "speaker"
     ]
     result = {}
 
