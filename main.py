@@ -31,7 +31,7 @@ def register():
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO users (username, password, email, phone_number)
+            INSERT INTO users (username, password, email, phone)
             VALUES (%s, %s, %s, %s)
         """, (username, password_hash, email, phone))
         conn.commit()
