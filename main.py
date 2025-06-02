@@ -31,7 +31,7 @@ def register():
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO users (username, password_hash, email, phone_number)
+            INSERT INTO users (username, password, email, phone_number)
             VALUES (%s, %s, %s, %s)
         """, (username, password_hash, email, phone))
         conn.commit()
@@ -55,7 +55,7 @@ def login():
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT * FROM users
-            WHERE username = %s AND password_hash = %s
+            WHERE username = %s AND password= %s
         """, (username, password_hash))
         user = cursor.fetchone()
         if user:
