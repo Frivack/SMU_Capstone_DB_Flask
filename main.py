@@ -25,7 +25,6 @@ def register():
     email = data['email']
     phone = data['phone']
     password = data['password']
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
 
     try:
         conn = mysql.connector.connect(**db_config)
@@ -33,7 +32,7 @@ def register():
         cursor.execute("""
             INSERT INTO users (username, password, email, phone)
             VALUES (%s, %s, %s, %s)
-        """, (username, password_hash, email, phone))
+        """, (username, password, email, phone))
         conn.commit()
         return jsonify({'message': 'Registration successful'}), 201
     except Exception as e:
@@ -48,7 +47,6 @@ def login():
     data = request.json
     username = data['username']
     password = data['password']
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
 
     try:
         conn = mysql.connector.connect(**db_config)
@@ -56,7 +54,7 @@ def login():
         cursor.execute("""
             SELECT * FROM users
             WHERE username = %s AND password= %s
-        """, (username, password_hash))
+        """, (username, password))
         user = cursor.fetchone()
         if user:
             return jsonify({'message': 'Login successful', 'user': user}), 200
