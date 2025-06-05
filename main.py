@@ -45,7 +45,7 @@ def register():
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
-    username = data['username']
+    email = data['email']
     password = data['password']
 
     try:
@@ -53,8 +53,8 @@ def login():
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT * FROM users
-            WHERE username = %s AND password= %s
-        """, (username, password))
+            WHERE email = %s AND password= %s
+        """, (email, password))
         user = cursor.fetchone()
         if user:
             return jsonify({'message': 'Login successful', 'user': user}), 200
