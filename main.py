@@ -52,8 +52,8 @@ def login():
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
-            SELECT * FROM users
-            WHERE email = %s AND password= %s
+            SELECT id AS user_id, email FROM users
+            WHERE email = %s AND password = %s
         """, (email, password))
         user = cursor.fetchone()
         if user:
