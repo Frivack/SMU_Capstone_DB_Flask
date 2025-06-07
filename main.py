@@ -118,31 +118,32 @@ def get_all_parts():
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
+        theme_masks = {
+            1: 16,  # 블랙 & 화이트 (특별 처리 필요)
+            2: 4,  # RGB
+            3: 16,  # 블랙
+            4: 2,  # 화이트
+            5: 8  # 핑크 & 퍼플
+        }
 
         for table in tables:
-            # 기본 SQL 쿼리
             query = f"SELECT * FROM {table}"
             params = []
             where_clauses = []
 
-            # 테마 ID에 따라 WHERE 절 추가
-            if theme_id is not None:
-                if theme_id == 1:  # 블랙 & 화이트 (10010)
-                    where_clauses.append("theme = %s")
-                    params.append('10010')
-                elif theme_id == 2:  # RGB (10100)
-                    # name 검색 대신 theme 컬럼을 직접 사용
-                    where_clauses.append("theme = %s")
-                    params.append('10100')
-                elif theme_id == 3:  # 블랙 (예시, 실제 값으로 변경 필요)
-                    where_clauses.append("theme = %s")
-                    params.append('00100')  # 예시: 블랙만 있는 테마 ID
-                elif theme_id == 4:  # 화이트 (예시, 실제 값으로 변경 필요)
-                    where_clauses.append("theme = %s")
-                    params.append('00010')  # 예시: 화이트만 있는 테마 ID
-                elif theme_id == 5:  # 핑크 & 퍼플 (예시, 실제 값으로 변경 필요)
-                    where_clauses.append("theme = %s")
-                    params.append('01001')  # 예시: 핑크/퍼플 테마 ID
+            cursor.execute(f"SHOW COLUMNS FROM {table} LIKE 'theme'")
+            has_theme_column = cursor.fetchone() is not None
+
+            if has_theme_column and theme_id is not None:
+                if theme_id == 1:
+                    where_clauses.append("(CAST(theme AS UNSIGNED) & %s > 0 OR CAST(theme AS UNSIGNED) & %s > 0)")
+                    params.extend([theme_masks[3], theme_masks[4]])
+
+                elif theme_id in theme_masks:
+                    mask = theme_masks[theme_id]
+                    # 비트 연산 쿼리️
+                    where_clauses.append("CAST(theme AS UNSIGNED) & %s > 0")
+                    params.append(mask)
 
             if where_clauses:
                 query += " WHERE " + " AND ".join(where_clauses)
