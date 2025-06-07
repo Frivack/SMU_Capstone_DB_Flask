@@ -113,13 +113,19 @@ def get_all_parts():
         "monitor", "motherboard", "mouse", "pc_case", "power_supply",
         "ram", "sound_card", "speaker"
     ]
+
+    theme_applicable_tables = [
+        "cooler", "earphone", "fan", "headset", "keyboard", "monitor",
+        "mouse", "pc_case", "ram", "speaker"
+    ]
+
     result = {}
 
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
         theme_masks = {
-            1: 16,  # 블랙 & 화이트 (특별 처리 필요)
+            # 블랙 & 화이트 (특별 처리)
             2: 4,  # RGB
             3: 16,  # 블랙
             4: 2,  # 화이트
@@ -129,31 +135,34 @@ def get_all_parts():
         for table in tables:
             query = f"SELECT * FROM {table}"
             params = []
-            where_clauses = []
 
-            cursor.execute(f"SHOW COLUMNS FROM {table} LIKE 'theme'")
-            has_theme_column = cursor.fetchone() is not None
-
-            if has_theme_column and theme_id is not None:
+            if table in theme_applicable_tables and theme_id is not None:
+                where_clauses = []
+                # 블랙(16) 또는 화이트(2)
                 if theme_id == 1:
                     where_clauses.append("(CAST(theme AS UNSIGNED) & %s > 0 OR CAST(theme AS UNSIGNED) & %s > 0)")
-                    params.extend([theme_masks[3], theme_masks[4]])
-
+                    params.extend([16, 2])
                 elif theme_id in theme_masks:
                     mask = theme_masks[theme_id]
-                    # 비트 연산 쿼리️
                     where_clauses.append("CAST(theme AS UNSIGNED) & %s > 0")
                     params.append(mask)
 
-            if where_clauses:
-                query += " WHERE " + " AND ".join(where_clauses)
+                if where_clauses:
+                    query += " WHERE " + " AND ".join(where_clauses)
 
-            # 페이지네이션을 위한 LIMIT, OFFSET 추가
             query += " LIMIT %s OFFSET %s"
             params.extend([limit, offset])
 
             cursor.execute(query, tuple(params))
-            result[table] = cursor.fetchall()
+            table_result = cursor.fetchall()
+
+            if not table_result and table in theme_applicable_tables and theme_id is not None:
+                print(f"No results for table {table} with theme {theme_id}. Fetching default parts.")
+                default_query = f"SELECT * FROM {table} LIMIT %s OFFSET %s"
+                cursor.execute(default_query, (limit, offset))
+                table_result = cursor.fetchall()
+
+            result[table] = table_result
 
         return jsonify(result)
     except Exception as e:
