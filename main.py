@@ -123,23 +123,27 @@ def get_all_parts():
             # 기본 SQL 쿼리
             query = f"SELECT * FROM {table}"
             params = []
+            where_clauses = []
 
             # 테마 ID에 따라 WHERE 절 추가
-            where_clauses = []
             if theme_id is not None:
-                if theme_id == 1:  # 1: 블랙 & 화이트
-                    where_clauses.append("color IN ('Black', 'White')")
-                elif theme_id == 2:  # 2: RGB
-                    where_clauses.append("name LIKE %s")
-                    params.append('%RGB%')
-                elif theme_id == 3:  # 3: 블랙
-                    where_clauses.append("color = %s")
-                    params.append('Black')
-                elif theme_id == 4:  # 4: 화이트
-                    where_clauses.append("color = %s")
-                    params.append('White')
-                elif theme_id == 5:  # 5: 핑크 & 퍼플
-                    where_clauses.append("color IN ('Pink', 'Purple')")
+                # ‼️‼️ "color" -> "theme" 으로 모두 변경 ‼️‼️
+                if theme_id == 1:  # 블랙 & 화이트 (10010)
+                    where_clauses.append("theme = %s")
+                    params.append('10010')
+                elif theme_id == 2:  # RGB (10100)
+                    # name 검색 대신 theme 컬럼을 직접 사용
+                    where_clauses.append("theme = %s")
+                    params.append('10100')
+                elif theme_id == 3:  # 블랙 (예시, 실제 값으로 변경 필요)
+                    where_clauses.append("theme = %s")
+                    params.append('00100')  # 예시: 블랙만 있는 테마 ID
+                elif theme_id == 4:  # 화이트 (예시, 실제 값으로 변경 필요)
+                    where_clauses.append("theme = %s")
+                    params.append('00010')  # 예시: 화이트만 있는 테마 ID
+                elif theme_id == 5:  # 핑크 & 퍼플 (예시, 실제 값으로 변경 필요)
+                    where_clauses.append("theme = %s")
+                    params.append('01001')  # 예시: 핑크/퍼플 테마 ID
 
             if where_clauses:
                 query += " WHERE " + " AND ".join(where_clauses)
