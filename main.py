@@ -127,7 +127,6 @@ def get_all_parts():
 
             # 테마 ID에 따라 WHERE 절 추가
             if theme_id is not None:
-                # ‼️‼️ "color" -> "theme" 으로 모두 변경 ‼️‼️
                 if theme_id == 1:  # 블랙 & 화이트 (10010)
                     where_clauses.append("theme = %s")
                     params.append('10010')
